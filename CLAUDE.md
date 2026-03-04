@@ -9,8 +9,8 @@ This is the `.github` org-level repository for **Magnitude Instruments**. It con
 ## Structure
 
 - `CONTRIBUTING.md` — Git Flow branching strategy, commit conventions, development workflow
-- `PULL_REQUEST_TEMPLATE.md` — Default PR template for all org repos
-- `ISSUE_TEMPLATE/` — Bug report and feature request templates
+- `.github/PULL_REQUEST_TEMPLATE.md` — Default PR template for all org repos
+- `.github/ISSUE_TEMPLATE/` — Bug report and feature request templates
 - `cpp/CODING_STYLE.md` — Naming, formatting, class layout, modern C++ conventions
 - `cpp/CMAKE_CONVENTIONS.md` — CMake target naming, components, versioning, build presets
 - `cpp/TESTING_STANDARDS.md` — Google Test conventions, mocking strategies, test organization
