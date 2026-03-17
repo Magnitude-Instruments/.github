@@ -17,19 +17,51 @@ These files apply to all repositories in the organization unless overridden by a
 - [Testing Standards](cpp/TESTING_STANDARDS.md) — Google Test conventions, mocking strategies, test organization
 - [Navigation Templates](cpp/NAVIGATION_TEMPLATES.md) — Documentation structure and navigation patterns for library repos
 
-## Tech Stack
+## AWS Standards
 
+- [SAM Conventions](aws/SAM_CONVENTIONS.md) — Project structure, naming, template patterns, deployment workflow
+- [Python Lambda Style](aws/PYTHON_LAMBDA_STYLE.md) — Handler patterns, logging, error handling, SES emails
+
+## React Standards
+
+- [React Conventions](react/REACT_CONVENTIONS.md) — Component patterns, state management, styling, accessibility, API integration
+
+## Tech Stacks
+
+### C++
 - **C++23** with MSVC (Visual Studio 2026, v145 toolset)
 - **CMake** with presets and vcpkg integration
 - **Google Test** for unit testing
-- **Semantic Versioning** (MAJOR.MINOR.PATCH)
 
-## Standard Build Pattern
+### AWS / Backend
+- **Python 3.12** Lambda functions via AWS SAM
+- **API Gateway** with Cognito JWT authorization
+- **SES** for transactional emails
+- **S3**, **DynamoDB**, **Secrets Manager**
 
-All C++ library repos follow the same build commands:
+### Frontend
+- **React 18** (JavaScript) with Vite
+- **AWS Amplify v6** for Auth and API modules
+- **MUI 5** for UI components
+- **AWS Amplify Hosting** for CI/CD
 
+## Standard Build Patterns
+
+### C++ Libraries
 ```bash
 cmake --preset debug
 cmake --build build/debug --config Debug
 ctest --test-dir build/debug -C Debug --output-on-failure
+```
+
+### SAM Projects
+```bash
+sam build --use-container
+sam deploy
+```
+
+### React Apps
+```bash
+npm start        # Dev server
+npm run build    # Production build
 ```
