@@ -59,7 +59,7 @@ Description: >
 
 Globals:
   Function:
-    Runtime: python3.12
+    Runtime: python3.14
     MemorySize: 128
     Architectures:
       - x86_64
@@ -119,11 +119,19 @@ Use `prod` for all SAM API stages. Environment separation is handled at the stac
 
 ## IAM Policies
 
-Scope permissions to the minimum required. Never use managed policies like `AmazonS3ReadOnlyAccess` — use inline statements scoped to specific resources:
+Scope permissions to the minimum required. Never use broad AWS managed policies like `AmazonS3ReadOnlyAccess`.
+
+**SAM policy templates** (e.g., `DynamoDBCrudPolicy`, `AWSSecretsManagerGetSecretValuePolicy`) are acceptable — they generate scoped inline policies under the hood and are a safe convenience.
+
+For S3 or other cases not covered by a SAM policy template, use inline statements scoped to specific resources:
 
 ```yaml
 Policies:
-  - Statement:
+  - DynamoDBCrudPolicy:                          # SAM policy template — OK
+      TableName: !Ref TicketEventsTable
+  - AWSSecretsManagerGetSecretValuePolicy:       # SAM policy template — OK
+      SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:magnitude/asana-pat-*
+  - Statement:                                    # Inline statement for S3
       - Effect: Allow
         Action: s3:ListBucket
         Resource: arn:aws:s3:::maginstsrepobucket
@@ -137,12 +145,15 @@ Separate `ListBucket` (on the bucket ARN) from `GetObject` (on the object ARN wi
 
 ## Environment Variables
 
-Use environment variables for all configuration. Never hardcode:
+Use environment variables for values that vary between environments or contain secrets:
 - Bucket names
 - Table names
 - Email addresses
 - Secret ARNs
 - URLs
+- `LOG_LEVEL` (default `INFO` — allows switching to `DEBUG` without redeploying)
+
+Static identifiers that never change across environments (e.g., third-party API field IDs) may remain as module-level constants in the Lambda code (see PYTHON_LAMBDA_STYLE.md).
 
 ```yaml
 Environment:
@@ -196,6 +207,38 @@ Add to `.gitignore`:
 ```
 
 The `samconfig.toml` may be committed if it contains no secrets (it typically doesn't), but deployment-specific configs (account-specific bucket names) should be in `.gitignore` if they vary between developers.
+
+## Lambda Timeouts
+
+The default Lambda timeout is 3 seconds, which is too short for functions that call external APIs (Asana, SES, Google Chat, etc.). Set an explicit `Timeout` in the SAM template:
+
+```yaml
+Globals:
+  Function:
+    Timeout: 30       # 30 seconds — reasonable default for API-calling Lambdas
+
+# Or per-function for longer operations:
+SlowFunction:
+  Properties:
+    Timeout: 120      # 2 minutes for batch/scheduled tasks
+```
+
+- **API-backed functions**: 30 seconds is a safe default
+- **Scheduled/batch functions**: Set based on expected workload, up to 900 seconds (15 minutes max)
+
+## Local Development
+
+Use SAM CLI for local testing before deploying:
+
+```bash
+# Invoke a single function with a test event
+sam local invoke ProcessNewTicketFunction -e events/test_event.json
+
+# Start a local API Gateway
+sam local start-api
+```
+
+Store sample events in an `events/` directory at the project root for repeatable local testing.
 
 ## Region
 

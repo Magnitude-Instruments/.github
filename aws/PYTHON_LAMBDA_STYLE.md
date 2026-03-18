@@ -4,7 +4,7 @@ Coding conventions for AWS Lambda functions in Python at Magnitude Instruments.
 
 ## Runtime
 
-- **Python 3.12** (match across all SAM projects)
+- **Python 3.14** (match across all SAM projects)
 - Only `boto3` is available in the Lambda runtime without a `requirements.txt`
 - For additional dependencies, add a `requirements.txt` or use a Lambda layer
 
@@ -21,8 +21,9 @@ import os
 
 import boto3
 
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(LOG_LEVEL)
 
 # Environment variables — read at module level
 S3_BUCKET = os.environ["S3_BUCKET"]
@@ -72,7 +73,11 @@ Handler: app.lambda_handler
 
 ## API Gateway Response Format
 
-All Lambda functions behind API Gateway must return a dict with `statusCode`, `headers`, and `body`:
+All Lambda functions behind API Gateway must return a dict with `statusCode`, `headers`, and `body`.
+
+### Browser-Facing APIs
+
+Browser-facing endpoints (called from React, Amplify, etc.) **must** include CORS headers on every response:
 
 ```python
 CORS_HEADERS = {
@@ -93,6 +98,23 @@ def lambda_handler(event, context):
 
 - Define `CORS_HEADERS` as a module-level constant
 - Always include CORS headers — API Gateway only handles CORS for OPTIONS preflight; the Lambda response needs them too
+
+### Server-to-Server Endpoints (Webhooks)
+
+Endpoints called exclusively by external services (e.g., Asana webhooks, Stripe webhooks) do **not** need CORS headers. Return `statusCode` and `body` only:
+
+```python
+def lambda_handler(event, context):
+    # ... logic ...
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps({"status": "ok"}),
+    }
+```
+
+### General
+
 - Use `json.dumps()` for JSON responses
 - For plain text responses (e.g., presigned URLs), set `body` to the raw string without `json.dumps()`
 
@@ -115,8 +137,9 @@ key = key.replace("|", "/").replace("%7C", "/")
 Use the standard `logging` module, not `print()`:
 
 ```python
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(LOG_LEVEL)
 
 # In handler:
 logger.info("Processing task %s", task_gid)
@@ -124,6 +147,7 @@ logger.warning("No email address — skipping")
 logger.exception("Failed to send email for %s", ticket_number)  # includes traceback
 ```
 
+- Set the log level from a `LOG_LEVEL` environment variable (default `INFO`) so you can switch to `DEBUG` in production without redeploying
 - Use `logger.info()` for normal operations
 - Use `logger.warning()` for recoverable issues (missing optional config, skipped steps)
 - Use `logger.exception()` inside `except` blocks — it automatically includes the traceback
@@ -230,6 +254,13 @@ while True:
         break
 ```
 
+## Environment Variables vs. Constants
+
+Use environment variables for values that **vary between environments** or contain secrets:
+- Bucket names, table names, email addresses, secret ARNs, URLs
+
+Static identifiers that are the same in every environment (e.g., Asana field GIDs, fixed enum values) may remain as module-level constants — pushing these into env vars would bloat the SAM template with no benefit.
+
 ## Security
 
 - **Never hardcode AWS credentials** — Lambda execution roles provide credentials automatically via the environment
@@ -239,7 +270,7 @@ while True:
 
 ## Type Hints
 
-Use type hints on function signatures for clarity:
+Include parameter types **and** return types on all helper function signatures:
 
 ```python
 def _build_email_html(ticket_number: str, greeting: str, task_name: str = "") -> str:
@@ -247,7 +278,12 @@ def _build_email_html(ticket_number: str, greeting: str, task_name: str = "") ->
 
 def _next_sequence_number(year_month: str) -> int:
     ...
+
+def _send_confirmation_email(ticket_number: str, task: dict) -> None:
+    ...
 ```
+
+For lazy-init getters, type hints are optional — the return type is always a boto3 client/resource and the pattern is self-documenting.
 
 Not required on `lambda_handler` (the signature is always `(event, context)`).
 

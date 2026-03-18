@@ -36,9 +36,11 @@ Conventional Commits format: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `ch
 - Semantic versioning (MAJOR.MINOR.PATCH)
 
 ### AWS Standards
-- Python 3.12 Lambda functions via AWS SAM
-- Lazy-init boto3 clients, env vars for config, CORS headers on all responses
+- Python 3.14 Lambda functions via AWS SAM
+- Lazy-init boto3 clients, env vars for environment-specific config
+- CORS headers on browser-facing responses (not required for webhooks)
 - Branded HTML email templates via SES
+- Configurable log level via `LOG_LEVEL` env var
 - Region: us-east-1
 
 ### React Standards
