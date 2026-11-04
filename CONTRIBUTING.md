@@ -10,7 +10,7 @@ main                        ← The trunk: every merged change, always releasabl
 release/<major>.<minor>.x   ← Only when a shipped version needs a fix it can't take from main
 ```
 
-There is no `develop` branch. Some older repositories still have a `dev` or `develop` branch from before; each one moves to `main` the next time it is worked on.
+There is no `develop` branch. Some older repositories still use a `dev` or `develop` branch. A repository's own CONTRIBUTING.md, if it has one, takes precedence over this file.
 
 ### Day-to-Day Development
 
