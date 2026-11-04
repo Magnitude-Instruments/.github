@@ -6,7 +6,7 @@ Organization-wide standards, templates, and development conventions for [Magnitu
 
 These files apply to all repositories in the organization unless overridden by a repo's own version:
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) — Git Flow branching strategy, commit conventions, development workflow
+- [CONTRIBUTING.md](CONTRIBUTING.md) — Trunk-based branching, commit conventions, development workflow
 - [PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) — Default pull request template
 - [ISSUE_TEMPLATE/](.github/ISSUE_TEMPLATE/) — Bug report and feature request templates
 

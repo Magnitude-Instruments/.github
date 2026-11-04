@@ -8,7 +8,7 @@ This is the `.github` org-level repository for **Magnitude Instruments**. It con
 
 ## Structure
 
-- `CONTRIBUTING.md` — Git Flow branching strategy, commit conventions, development workflow
+- `CONTRIBUTING.md` — Trunk-based branching, commit conventions, development workflow
 - `.github/PULL_REQUEST_TEMPLATE.md` — Default PR template for all org repos
 - `.github/ISSUE_TEMPLATE/` — Bug report and feature request templates
 - `cpp/CODING_STYLE.md` — Naming, formatting, class layout, modern C++ conventions
@@ -21,13 +21,14 @@ This is the `.github` org-level repository for **Magnitude Instruments**. It con
 
 ## Org-Wide Conventions
 
-### Branching (Git Flow)
-- **main** — Tagged releases only
-- **develop** — Integration branch (default PR target)
-- **feature/**, **hotfix/**, **release/** — Standard Git Flow branches
+### Branching (trunk-based)
+- **main** — The only long-lived branch, always releasable; every PR targets it
+- **`<type>/<issue>-<slug>`** — Short-lived work branches cut from `main`, squash-merged by PR
+- **`release/<major>.<minor>.x`** — Only when a shipped version needs a fix it can't take from `main`
+- Releases are annotated tags on `main` (`vX.Y.Z`). There is no `develop` branch.
 
 ### Commit Messages
-Conventional Commits format: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
+Conventional Commits format: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, with the issue in the scope when there is one (`fix(#42): …`). Squash merges make the PR title the commit.
 
 ### C++ Standards
 - C++23, MSVC (Visual Studio 2026, v145 toolset)
